@@ -20,6 +20,8 @@ urls = [
     "https://www.gsu.edu/program/computer-science-ms/?utm_source=pltitle&utm_medium=cas&utm_content=ms&utm_campaign=program_explorer",
     "https://catalogs.gsu.edu/content.php?catoid=42&navoid=5496",
     "https://catalogs.gsu.edu/content.php?catoid=42&navoid=5496#3010-general-information",
+    "https://communication.gsu.edu/document/ma-handbook/?wpdmdl=4945&refresh=5faed98232b1d1605294466",
+    "https://csds.gsu.edu/?wpdmdl=4939&ind=1620936669195",
 
 ]
 
@@ -28,8 +30,8 @@ documentList = [doc for subset in documents for doc in subset]
 
 #Document Split/Chunking
 text_splitter = RecursiveCharacterTextSplitter(
-    chunk_size=400,
-    chunk_overlap=80
+    chunk_size=450,
+    chunk_overlap=100
 )
 
 documentSlit = text_splitter.split_documents(documentList)
