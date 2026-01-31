@@ -34,14 +34,14 @@ text_splitter = RecursiveCharacterTextSplitter(
     chunk_overlap=100
 )
 
-documentSlit = text_splitter.split_documents(documentList)
+documentSplit = text_splitter.split_documents(documentList)
 
 #vectorize the documents
 embeddings = OllamaEmbeddings(model="nomic-embed-text")
 
-vectorstore = SKLearnVectorStore.from_documents(documentSlit, embeddings)
+vectorstore = SKLearnVectorStore.from_documents(documentSplit, embeddings)
 
-retriever = vectorstore.as_retriever(search_kwargs={"k":4})
+retriever = vectorstore.as_retriever(search_kwargs={"k":6})
 
 #Create RAG Chain and connnect to model and prompt
 prompt = PromptTemplate(
@@ -60,7 +60,7 @@ prompt = PromptTemplate(
 Documents:
 {documents}
 
-Question:
+Query:
 {question}
 
 Answer (max 3 sentences):
@@ -69,4 +69,23 @@ Answer (max 3 sentences):
 )
 langModel = ChatOllama(model="llama3.1", temperature=0)
 ragChain = prompt | langModel | StrOutputParser()
+
+#Create RunSite
+
+class Application:
+    def __init__(self, retriever, ragChain):
+        self.retriever = retriever
+        self.ragChain = ragChain
+
+    def run(self, Query):
+        docs = self.retriever.invoke(Query)
+        if not docs:
+            return "I don't know."
+        context = "\n\n".join([doc.page_content for doc in docs])
+        response = self.ragChain.invoke({
+            "question": Query,
+            "documents": context
+        })
+        return response
+    
 
