@@ -87,5 +87,12 @@ class Application:
             "documents": context
         })
         return response
-    
+
+RAG = Application(retriever, ragChain)
+
+Query = ""
+answer = RAG.run(Query)
+print("Q:", Query)
+print("A:", answer)
+
 
