@@ -43,3 +43,30 @@ vectorstore = SKLearnVectorStore.from_documents(documentSlit, embeddings)
 
 retriever = vectorstore.as_retriever(search_kwargs={"k":4})
 
+#Create RAG Chain and connnect to model and prompt
+prompt = PromptTemplate(
+    template="""You are a question-answering model.
+    You can only answer questions based on the context provided above in docs from Georgia State University's official website.
+    You can only use information present to answer the question.
+    If the answer is not explicitly stated, respond with "I don't know."
+    If the question is not related to the context, respond with "I don't know."
+    If the question is about a different university, respond with "I don't know."
+    If the quesition contains any verbal abuse or harmful content, respond with "I don't know."
+    If the question is about anything illegal or unethical, respond with "I don't know."
+    If the question is about anything political, respond with "I don't know."
+    If the question is boyond context, respond with "I don't know."
+
+
+Documents:
+{documents}
+
+Question:
+{question}
+
+Answer (max 3 sentences):
+""",
+    input_variables=["question", "documents"],
+)
+langModel = ChatOllama(model="llama3.1", temperature=0)
+ragChain = prompt | langModel | StrOutputParser()
+
