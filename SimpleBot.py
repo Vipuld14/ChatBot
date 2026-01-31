@@ -21,7 +21,7 @@ urls = [
     "https://catalogs.gsu.edu/content.php?catoid=42&navoid=5496",
     "https://catalogs.gsu.edu/content.php?catoid=42&navoid=5496#3010-general-information",
     "https://communication.gsu.edu/document/ma-handbook/?wpdmdl=4945&refresh=5faed98232b1d1605294466",
-    "https://csds.gsu.edu/?wpdmdl=4939&ind=1620936669195",
+    "https://csds.gsu.edu/?wpdmdl=4939&ind=1620936669195"
 
 ]
 
@@ -35,4 +35,11 @@ text_splitter = RecursiveCharacterTextSplitter(
 )
 
 documentSlit = text_splitter.split_documents(documentList)
+
+#vectorize the documents
+embeddings = OllamaEmbeddings(model="nomic-embed-text")
+
+vectorstore = SKLearnVectorStore.from_documents(documentSlit, embeddings)
+
+retriever = vectorstore.as_retriever(search_kwargs={"k":4})
 
