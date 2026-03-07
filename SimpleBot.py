@@ -10,6 +10,8 @@ from langchain_core.output_parsers import StrOutputParser
 #Import Embeddings
 from langchain_ollama import OllamaEmbeddings
 from langchain_community.vectorstores import SKLearnVectorStore
+from langchain_core.documents import Document
+import re
 
 # Docuent Loading
 urls = [
@@ -30,8 +32,9 @@ documentList = [doc for subset in documents for doc in subset]
 
 #Document Split/Chunking
 text_splitter = RecursiveCharacterTextSplitter(
-    chunk_size=450,
-    chunk_overlap=100
+    chunk_size=800,
+    chunk_overlap=150
+    seperators = ["\n\n", "\n", " ", "", "."]
 )
 
 documentSplit = text_splitter.split_documents(documentList)
@@ -41,7 +44,7 @@ embeddings = OllamaEmbeddings(model="nomic-embed-text")
 
 vectorstore = SKLearnVectorStore.from_documents(documentSplit, embeddings)
 
-retriever = vectorstore.as_retriever(search_kwargs={"k":6})
+retriever = vectorstore.as_retriever(search_kwargs={"k":10})
 
 #Create RAG Chain and connnect to model and prompt
 prompt = PromptTemplate(
