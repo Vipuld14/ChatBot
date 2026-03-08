@@ -30,14 +30,23 @@ urls = [
 documents = [WebBaseLoader(url).load() for url in urls]
 documentList = [doc for subset in documents for doc in subset]
 
+
+#removes excessive whitespace and newlines from the text
+def clean_text(text):
+    return text.strip()
+
+cleanedDoc = []
+for doc in documentList:
+    cleaned_content = clean_text(doc.page_content)
+    cleanedDoc.append(Document(page_content=cleaned_content, metadata=doc.metadata))
 #Document Split/Chunking
 text_splitter = RecursiveCharacterTextSplitter(
     chunk_size=800,
-    chunk_overlap=150
-    seperators = ["\n\n", "\n", " ", "", "."]
+    chunk_overlap=150,
+    separators = ["\n\n", "\n", '.', " ", ""]
 )
 
-documentSplit = text_splitter.split_documents(documentList)
+documentSplit = text_splitter.split_documents(cleanedDoc)
 
 #vectorize the documents
 embeddings = OllamaEmbeddings(model="nomic-embed-text")
@@ -81,9 +90,12 @@ class Application:
         self.ragChain = ragChain
 
     def run(self, Query):
+        if not Query:
+            return "Please enter a question."
         docs = self.retriever.invoke(Query)
         if not docs:
-            return "I don't know."
+            return "I don't know based on the docs provided."
+        context = []
         context = "\n\n".join([doc.page_content for doc in docs])
         response = self.ragChain.invoke({
             "question": Query,
@@ -93,9 +105,15 @@ class Application:
 
 RAG = Application(retriever, ragChain)
 
-Query = ""
-answer = RAG.run(Query)
-print("Q:", Query)
-print("A:", answer)
+tests = [
+    "What are the admission requirements for the Computer Science BS program?",
+    "How many credit hours are required for the Computer Science MS program?",
+    "What core courses are required for the Computer Science undergraduate program?",
+]
 
+for Query in tests:
+    answer = RAG.run(Query)
+    print("Q:", Query)
+    print("A:", answer)
+    print("\n")
 
