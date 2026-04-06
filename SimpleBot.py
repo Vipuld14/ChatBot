@@ -33,7 +33,10 @@ documentList = [doc for subset in documents for doc in subset]
 
 #removes excessive whitespace and newlines from the text
 def clean_text(text):
+    text = re.sub(r'\s+', ' ', text)  
+    text = re.sub(r'\n+', '\n', text)
     return text.strip()
+
 
 cleanedDoc = []
 for doc in documentList:
@@ -53,7 +56,7 @@ embeddings = OllamaEmbeddings(model="nomic-embed-text")
 
 vectorstore = SKLearnVectorStore.from_documents(documentSplit, embeddings)
 
-retriever = vectorstore.as_retriever(search_kwargs={"k":10})
+retriever = vectorstore.as_retriever(search_kwargs={"k":5})
 
 #Create RAG Chain and connnect to model and prompt
 prompt = PromptTemplate(
