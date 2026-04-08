@@ -3,11 +3,15 @@
 #Libararies for Documets Loading and Splitting
 from langchain_community.document_loaders import WebBaseLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+
 #Import Embeddings
 from langchain_ollama import OllamaEmbeddings
 from langchain_core.documents import Document
 import re
 from langchain_chroma import Chroma
+
+import json
+import os
 
 # Document Loading
 urls = [
@@ -21,6 +25,9 @@ urls = [
     "https://communication.gsu.edu/document/ma-handbook/?wpdmdl=4945&refresh=5faed98232b1d1605294466",
     "https://csds.gsu.edu/?wpdmdl=4939&ind=1620936669195"
 ]
+
+chromaLocation = "chroma_db"
+JsonPath = "split_docs.json"
 
 def clean_text(text):
     text = re.sub(r'\s+', ' ', text)
@@ -48,6 +55,15 @@ def split_documents(cleaned_docs):
     )
     return text_splitter.split_documents(cleaned_docs)
 
+def save_split_docs(split_docs, file_path = JsonPath):
+    serialized_docs = []
+    for doc in split_docs:
+        serialized_docs.append({
+            "page_content": doc.page_content,
+            "metadata": doc.metadata
+        })
+    with open(file_path, 'w', encoding='utf-8') as f:
+        json.dump(serialized_docs, f, indent=4, ensure_ascii=False)
 
 def build_and_save_vectorstore():
     cleaned_docs = load_and_clean_documents()
@@ -55,11 +71,17 @@ def build_and_save_vectorstore():
 
     embeddings = OllamaEmbeddings(model="nomic-embed-text")
 
-    vectorstore = Chroma.from_documents(
+    if not os.path.exists(chromaLocation):
+        import shutil
+        shutil.rmtree(chromaLocation)
+
+    Chroma.from_documents(
         documents=split_docs,
         embedding=embeddings,
-        persist_directory="chroma_db"
+        persist_directory=chromaLocation
     )
+
+    save_split_docs(split_docs)
 
     print("Vector store built and saved successfully.")
 
