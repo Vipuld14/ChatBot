@@ -1,76 +1,33 @@
-#Import necessary libraries
+# app.py
 
-#Libararies for Documets Loading and Splitting
-from langchain_community.document_loaders import WebBaseLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-#libraries for Embeddings and Vector Store
-from langchain_ollama import ChatOllama
+from langchain_ollama import ChatOllama, OllamaEmbeddings
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
-#Import Embeddings
+
+# Load saved vectorstore
+from langchain_chroma import Chroma
 from langchain_ollama import OllamaEmbeddings
-from langchain_community.vectorstores import SKLearnVectorStore
-from langchain_core.documents import Document
-import re
 
-# Docuent Loading
-urls = [
-    "https://catalogs.gsu.edu/preview_program.php?catoid=4&poid=1159",
-    "https://catalogs.gsu.edu/preview_program.php?catoid=43&poid=12713",
-    "https://catalogs.gsu.edu/preview_entity.php?catoid=43&ent_oid=2982",
-    "https://www.gsu.edu/program/computer-science-bs/?utm_source=pltitle&utm_medium=cas&utm_content=bs&utm_campaign=program_explorer",
-    "https://www.gsu.edu/program/computer-science-ms/?utm_source=pltitle&utm_medium=cas&utm_content=ms&utm_campaign=program_explorer",
-    "https://catalogs.gsu.edu/content.php?catoid=42&navoid=5496",
-    "https://catalogs.gsu.edu/content.php?catoid=42&navoid=5496#3010-general-information",
-    "https://communication.gsu.edu/document/ma-handbook/?wpdmdl=4945&refresh=5faed98232b1d1605294466",
-    "https://csds.gsu.edu/?wpdmdl=4939&ind=1620936669195"
-
-]
-
-documents = [WebBaseLoader(url).load() for url in urls]
-documentList = [doc for subset in documents for doc in subset]
-
-
-#removes excessive whitespace and newlines from the text
-def clean_text(text):
-    text = re.sub(r'\s+', ' ', text)  
-    text = re.sub(r'\n+', '\n', text)
-    return text.strip()
-
-
-cleanedDoc = []
-for doc in documentList:
-    cleaned_content = clean_text(doc.page_content)
-    cleanedDoc.append(Document(page_content=cleaned_content, metadata=doc.metadata))
-#Document Split/Chunking
-text_splitter = RecursiveCharacterTextSplitter(
-    chunk_size=800,
-    chunk_overlap=150,
-    separators = ["\n\n", "\n", '.', " ", ""]
-)
-
-documentSplit = text_splitter.split_documents(cleanedDoc)
-
-#vectorize the documents
 embeddings = OllamaEmbeddings(model="nomic-embed-text")
 
-vectorstore = SKLearnVectorStore.from_documents(documentSplit, embeddings)
+vectorstore = Chroma(
+    persist_directory="chroma_db",
+    embedding_function=embeddings
+)
 
-retriever = vectorstore.as_retriever(search_kwargs={"k":5})
+retriever = vectorstore.as_retriever(search_kwargs={"k": 3}, search_type="mmr")
 
-#Create RAG Chain and connnect to model and prompt
 prompt = PromptTemplate(
     template="""You are a question-answering model.
-    You can only answer questions based on the context provided above in docs from Georgia State University's official website.
-    You can only use information present to answer the question.
-    If the answer is not explicitly stated, respond with "I don't know."
-    If the question is not related to the context, respond with "I don't know."
-    If the question is about a different university, respond with "I don't know."
-    If the quesition contains any verbal abuse or harmful content, respond with "I don't know."
-    If the question is about anything illegal or unethical, respond with "I don't know."
-    If the question is about anything political, respond with "I don't know."
-    If the question is boyond context, respond with "I don't know."
-
+You can only answer questions based on the context provided above in docs from Georgia State University's official website.
+You can only use information present to answer the question.
+If the answer is not explicitly stated, respond with "I don't know."
+If the question is not related to the context, respond with "I don't know."
+If the question is about a different university, respond with "I don't know."
+If the question contains any verbal abuse or harmful content, respond with "I don't know."
+If the question is about anything illegal or unethical, respond with "I don't know."
+If the question is about anything political, respond with "I don't know."
+If the question is beyond context, respond with "I don't know."
 
 Documents:
 {documents}
@@ -82,26 +39,27 @@ Answer (max 3 sentences):
 """,
     input_variables=["question", "documents"],
 )
+
 langModel = ChatOllama(model="llama3.1", temperature=0)
 ragChain = prompt | langModel | StrOutputParser()
-
-#Create RunSite
 
 class Application:
     def __init__(self, retriever, ragChain):
         self.retriever = retriever
         self.ragChain = ragChain
 
-    def run(self, Query):
-        if not Query:
+    def run(self, query):
+        if not query:
             return "Please enter a question."
-        docs = self.retriever.invoke(Query)
+
+        docs = self.retriever.invoke(query)
         if not docs:
             return "I don't know based on the docs provided."
-        context = []
+
         context = "\n\n".join([doc.page_content for doc in docs])
+
         response = self.ragChain.invoke({
-            "question": Query,
+            "question": query,
             "documents": context
         })
         return response
@@ -112,11 +70,11 @@ tests = [
     "What are the admission requirements for the Computer Science BS program?",
     "How many credit hours are required for the Computer Science MS program?",
     "What core courses are required for the Computer Science undergraduate program?",
+    "What is the minimum GPA requirement for the Computer Science program to graduate?",
 ]
 
-for Query in tests:
-    answer = RAG.run(Query)
-    print("Q:", Query)
+for query in tests:
+    answer = RAG.run(query)
+    print("Q:", query)
     print("A:", answer)
-    print("\n")
-
+    print()
