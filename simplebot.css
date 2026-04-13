@@ -1,0 +1,198 @@
+@import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600&family=Source+Code+Pro:wght@400;500&display=swap');
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+body {
+  font-family: 'Lora', serif;
+  background: #D6E4F0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding: 25px;
+  color: #0D2E4A;
+}
+/*Header*/
+header {
+  width: 100%;
+  max-width: 800px;
+  padding: 2rem 1rem 1.5rem;
+  text-align: center;
+}
+.logo-badge {
+  display: inline-block;
+  background: #C2D9EE;
+  color: #1A5C8A;
+  font-size: 10px;
+  font-weight: 500;
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1px solid #90B8D8;
+  margin-bottom: 1rem;
+  letter-spacing: 0.07em;
+  font-family: 'Source Code Pro', monospace;
+}
+h1 {
+  font-size: 30px;
+  font-weight: 600;
+  color: #0D2E4A;
+  margin-bottom: 5px;
+}
+.subtitle {
+  font-size: 15px;
+  color: #4A6E8A;
+}
+/*Chat wrapper*/
+.chat-wrapper {
+  width: 100%;
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  padding: 0 0 1.5rem;
+}
+/*Chat log*/
+#chat-log {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 20px;
+  background: #F4F9FD;
+  border: 1px solid #B0CDE3;
+  border-radius: 12px 12px 0 0;
+  min-height: 380px;
+  max-height: 480px;
+  scroll-behavior: smooth;
+}
+#chat-log::-webkit-scrollbar { width: 5px; }
+#chat-log::-webkit-scrollbar-track { background: transparent; }
+#chat-log::-webkit-scrollbar-thumb { background: #B0CDE3; border-radius: 5px; }
+/*Messages*/
+.message {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.avatar {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 500;
+  font-family: 'Source Code Pro', monospace;
+}
+.user-avatar {
+  background: #1A5C8A;
+  color: white;
+}
+.bot-avatar {
+  background: #C2D9EE;
+  color: #1A5C8A;
+  border: 1px solid #90B8D8;
+}
+.bubble {
+  padding: 10px 15px;
+  border-radius: 10px;
+  font-size: 15px;
+  line-height: 1.7;
+  max-width: 90%;
+  font-family: 'Lora', serif;
+}
+.user-bubble {
+  background: #1A5C8A;
+  color: white;
+  border-top-left-radius: 5px;
+}
+.bot-bubble {
+  background: #E4F0F9;
+  border: 1px solid #B0CDE3;
+  color: #0D2E4A;
+  border-top-left-radius: 5px;
+}
+/*Typing dots*/
+.typing-dots span {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  background: #1A5C8A;
+  border-radius: 50%;
+  margin: 0 2px;
+  animation: blink 1.0s infinite;
+}
+.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes blink {
+  0%, 80%, 100% { opacity: 0.3; }
+  40%           { opacity: 1; }
+}
+/*Input bar*/
+.input-bar {
+  display: flex;
+  background: #0D2E4A;
+  border: 1px solid #0D2E4A;
+  border-top: none;
+  border-radius: 0 0 12px 12px;
+  overflow: hidden;
+}
+#question-input {
+  flex: 1;
+  background: #0D2E4A;
+  border: none;
+  outline: none;
+  padding: 10px 20px;
+  font-family: 'Lora', serif;
+  font-size: 15px;
+  color: white;
+}
+#question-input::placeholder { color: #7A9DB8; }
+#send-btn {
+  background:#1A5C8A;
+  color:white;
+  border:none;
+  border-left: 1px solid #2A7AB8;
+  padding:0 20px;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.1rem;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+#send-btn:hover   { background: #0D2E4A; }
+#send-btn:active  { transform: scale(1.0); }
+#send-btn:disabled {
+  background: #4A6E8A;
+  color: #B0CDE3;
+  cursor: not-allowed;
+}
+/*Suggestion chips*/
+.suggestions {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.suggestion-chip {
+  background: #F4F9FD;
+  border: 1px solid #B0CDE3;
+  color: #4A6E8A;
+  font-family: 'Lora', serif;
+  font-size: 12px;
+  padding: 6px 15px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.suggestion-chip:hover {
+  color: #0D2E4A;
+  border-color: #B0CDE3;
+  background: #E4F0F9;
+}
