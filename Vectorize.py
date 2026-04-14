@@ -13,6 +13,9 @@ from langchain_chroma import Chroma
 import json
 import os
 
+import shutil
+
+
 # Document Loading
 urls = [
     "https://catalogs.gsu.edu/preview_program.php?catoid=4&poid=1159",
@@ -49,7 +52,7 @@ def load_and_clean_documents():
 
 def split_documents(cleaned_docs):
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=400,
+        chunk_size=700,
         chunk_overlap=60,
         separators=["\n\n", "\n", ".", " ", ""]
     )
@@ -72,7 +75,6 @@ def build_and_save_vectorstore():
     embeddings = OllamaEmbeddings(model="nomic-embed-text")
 
     if not os.path.exists(chromaLocation):
-        import shutil
         shutil.rmtree(chromaLocation)
 
     Chroma.from_documents(

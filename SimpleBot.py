@@ -59,13 +59,15 @@ If the question is about anything illegal or unethical, respond with "I don't kn
 If the question is about anything political, respond with "I don't know."
 If the question is beyond context, respond with "I don't know."
 
+
 Documents:
 {documents}
 
 Query:
 {question}
 
-Answer (max 3 sentences):
+Answer (max 3 sentences). End your responses with a Source attribution in the format [Source: URL] where URL is the source of the information from the documents provided.
+
 """,
     input_variables=["question", "documents"],
 )
@@ -99,7 +101,8 @@ class Application:
         if not docs:
             return "I don't know based on the docs provided."
 
-        context = "\n\n".join(doc.page_content for doc in docs)
+        context = "\n\n".join(
+            f"[Source: {doc.metadata.get('source', 'Unknown')}] {doc.page_content}" for doc in docs)
 
         response = self.ragChain.invoke({
             "question": query,
