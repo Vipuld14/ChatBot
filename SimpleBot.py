@@ -5,13 +5,15 @@ from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.documents import Document
 
-from langchain_chroma import Chroma
+from langchain_community.vectorstores import FAISS
 from langchain_community.retrievers import BM25Retriever
 
+from langchain_classic.retrievers.contextual_compression import ContextualCompressionRetriever
+from langchain_community.document_compressors.flashrank_rerank import FlashrankRerank
 import json
 import os
 
-chromaloc = "chroma_db"
+faissloc = "faiss_db"
 jsonloc = "split_docs.json"
 
 
@@ -25,19 +27,26 @@ def load_split_docs(file_path=jsonloc):
     ]
 
 
-# Dense retrieval with Chroma
+# Dense retrieval with FAISS
 embeddings = OllamaEmbeddings(model="nomic-embed-text")
 
-vectorstore = Chroma(
-    persist_directory=chromaloc,
-    embedding_function=embeddings
+vectorstore = FAISS.load_local(
+    faissloc,
+    embeddings,
+    allow_dangerous_deserialization=True
 )
+
 
 dense_retriever = vectorstore.as_retriever(
     search_type="mmr",
     search_kwargs={"k": 4}
 )
 
+compressor = FlashrankRerank(top_n=3)
+reranker = ContextualCompressionRetriever(
+    base_compressor=compressor,
+    base_retriever=dense_retriever
+)
 
 # Sparse retrieval with BM25
 split_docs = load_split_docs()
@@ -72,7 +81,7 @@ Answer (max 3 sentences). End your responses with a Source attribution in the fo
     input_variables=["question", "documents"],
 )
 
-langModel = ChatOllama(model="llama3.1", temperature=0)
+langModel = ChatOllama(model="llama3.2", temperature=0)
 ragChain = prompt | langModel | StrOutputParser()
 
 
@@ -90,8 +99,10 @@ class Application:
             doc.page_content: doc
             for doc in dense_docs + sparse_docs
         }
+        allDocs = list(combined_docs.values())
 
-        return list(combined_docs.values())
+        reranked_docs = compressor.compress_documents(allDocs, query)
+        return reranked_docs if reranked_docs else allDocs
 
     def run(self, query):
         if not query:

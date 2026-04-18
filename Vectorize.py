@@ -8,12 +8,13 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_ollama import OllamaEmbeddings
 from langchain_core.documents import Document
 import re
-from langchain_chroma import Chroma
 
 import json
 import os
 
+from langchain_community.vectorstores import FAISS
 import shutil
+
 
 
 # Document Loading
@@ -26,11 +27,19 @@ urls = [
     "https://catalogs.gsu.edu/content.php?catoid=42&navoid=5496",
     "https://catalogs.gsu.edu/content.php?catoid=42&navoid=5496#3010-general-information",
     "https://communication.gsu.edu/document/ma-handbook/?wpdmdl=4945&refresh=5faed98232b1d1605294466",
-    "https://csds.gsu.edu/?wpdmdl=4939&ind=1620936669195"
+    "https://csds.gsu.edu/?wpdmdl=4939&ind=1620936669195",
+    "https://catalogs.gsu.edu/preview_program.php?catoid=4&poid=1159#admissions",
+    "https://catalogs.gsu.edu/preview_program.php?catoid=4&poid=1159&returnto=173",
+    
 ]
 
-chromaLocation = "chroma_db"
+faissLocation = "faiss_db"
 JsonPath = "split_docs.json"
+
+import gc
+gc.collect()  # release any held references before deleting
+if os.path.exists(faissLocation):
+    shutil.rmtree(faissLocation, ignore_errors=True)
 
 def clean_text(text):
     text = re.sub(r'\s+', ' ', text)
@@ -52,7 +61,7 @@ def load_and_clean_documents():
 
 def split_documents(cleaned_docs):
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=700,
+        chunk_size=400,
         chunk_overlap=60,
         separators=["\n\n", "\n", ".", " ", ""]
     )
@@ -74,14 +83,14 @@ def build_and_save_vectorstore():
 
     embeddings = OllamaEmbeddings(model="nomic-embed-text")
 
-    if not os.path.exists(chromaLocation):
-        shutil.rmtree(chromaLocation)
+    if os.path.exists(faissLocation):
+        shutil.rmtree(faissLocation, ignore_errors=True)
 
-    Chroma.from_documents(
-        documents=split_docs,
-        embedding=embeddings,
-        persist_directory=chromaLocation
+    vectorStore = FAISS.from_documents(
+        split_docs,
+        embeddings
     )
+    vectorStore.save_local(faissLocation)
 
     save_split_docs(split_docs)
 
