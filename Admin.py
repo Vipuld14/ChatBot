@@ -6,6 +6,8 @@ import subprocess
 import threading
 import sys
 
+from RAG_ChatBot import RAG
+
 app = Flask(__name__, static_folder=".")
 CORS(app)
 
@@ -27,6 +29,28 @@ def save_sources(sources):
     with open(SOURCES_PATH, "w", encoding="utf-8") as f:
         json.dump(sources, f, indent=4)
 
+
+
+@app.route("/api/chat", methods=["POST"])
+def chat():
+    data = request.get_json()
+    query = data.get("query", "").strip()
+    if not query:
+        return jsonify({"error": "Query is required"}), 400
+    try:
+        answer = RAG.run(query)
+        return jsonify({"answer": answer, "sources": []})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/")
+def serve_chat():
+    with open(os.path.join(BASE_DIR, "Chat.html"), "r", encoding="utf-8") as f:
+        content = f.read()
+    return content, 200, {"Content-Type": "text/html; charset=utf-8"}
+@app.route("/admin")
+def serve_admin():
+    return send_from_directory(BASE_DIR, "Admin.html")
 
 @app.route("/api/sources", methods=["GET"])
 def get_sources():
@@ -108,9 +132,7 @@ def get_vectorize_status():
     return jsonify(vectorize_status)
 
 
-@app.route("/")
-def serve_admin():
-    return send_from_directory(BASE_DIR, "Admin.html")
+
 
 
 if __name__ == "__main__":

@@ -123,16 +123,3 @@ class Application:
     
 RAG = Application(dense_retriever, bm25_retriever, ragChain)
 
-tests = [
-    "What are the admission requirements for the Computer Science BS program?",
-    "How many credit hours are required for the Computer Science MS program?",
-    "What core courses are required for the Computer Science undergraduate program?",
-    "What is the minimum GPA requirement for the Computer Science program to graduate?",
-    "What is CSC 1301?"
-]
-
-for query in tests:
-    answer = RAG.run(query)
-    print("Q:", query)
-    print("A:", answer)
-    print()
