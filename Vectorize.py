@@ -11,33 +11,40 @@ import re
 
 import json
 import os
-
+import json5
 from langchain_community.vectorstores import FAISS
 import shutil
 
 
-
-# Document Loading
-urls = [
-    "https://catalogs.gsu.edu/preview_program.php?catoid=4&poid=1159",
-    "https://catalogs.gsu.edu/preview_program.php?catoid=43&poid=12713",
-    "https://catalogs.gsu.edu/preview_entity.php?catoid=43&ent_oid=2982",
-    "https://www.gsu.edu/program/computer-science-bs/?utm_source=pltitle&utm_medium=cas&utm_content=bs&utm_campaign=program_explorer",
-    "https://www.gsu.edu/program/computer-science-ms/?utm_source=pltitle&utm_medium=cas&utm_content=ms&utm_campaign=program_explorer",
-    "https://catalogs.gsu.edu/content.php?catoid=42&navoid=5496",
-    "https://catalogs.gsu.edu/content.php?catoid=42&navoid=5496#3010-general-information",
-    "https://communication.gsu.edu/document/ma-handbook/?wpdmdl=4945&refresh=5faed98232b1d1605294466",
-    "https://csds.gsu.edu/?wpdmdl=4939&ind=1620936669195",
-    "https://catalogs.gsu.edu/preview_program.php?catoid=4&poid=1159#admissions",
-    "https://catalogs.gsu.edu/preview_program.php?catoid=4&poid=1159&returnto=173",
-    
-]
-
 faissLocation = "faiss_db"
 JsonPath = "split_docs.json"
+SourcesPath = "sources.json"
+
+# Document Loading
+def load_sources(file_path=SourcesPath):
+    if not os.path.exists(file_path):
+        return []
+    if os.path.getsize(file_path) == 0:
+        return []
+    with open(file_path, "r", encoding="utf-8") as f:
+        content = f.read().strip()
+    if not content:
+        return []
+    content = re.sub(r',\s*(\]|\})', r'\1', content)
+    try:
+        urls = json5.loads(content)
+        return urls
+    except Exception as e:
+        print(f"Error decoding JSON: {e}")
+        return []
+def save_sources(sources, file_path=SourcesPath):
+    with open(file_path, "w", encoding="utf-8") as f:
+        json.dump(sources, f, indent=4, ensure_ascii=False)
+
+
 
 import gc
-gc.collect()  # release any held references before deleting
+gc.collect() 
 if os.path.exists(faissLocation):
     shutil.rmtree(faissLocation, ignore_errors=True)
 
@@ -47,6 +54,11 @@ def clean_text(text):
     return text.strip()
 
 def load_and_clean_documents():
+
+    urls = load_sources()
+    if not urls:
+        raise ValueError("No URLs found in sources file.")
+    
     documents = [WebBaseLoader(url).load() for url in urls]
     document_list = [doc for subset in documents for doc in subset]
 
