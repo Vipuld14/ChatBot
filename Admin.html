@@ -5,13 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ChatBot Admin</title>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-family: sans-serif;
       background: #F5F5F5;
-      color: #111;
-      min-height: 100vh;
       padding: 2rem 1rem;
     }
 
@@ -23,109 +21,59 @@
       gap: 1rem;
     }
 
-    .page-header {
-      margin-bottom: 0.5rem;
-    }
-
-    .page-header h1 {
-      font-size: 20px;
-      font-weight: 600;
-      color: #111;
-    }
-
-    .page-header p {
-      font-size: 13px;
-      color: #666;
-      margin-top: 2px;
-    }
+    h1 { font-size: 20px; color: #111; }
+    h1 + p { font-size: 13px; color: #666; margin-top: 4px; }
 
     .card {
-      background: #fff;
-      border: 0.5px solid rgba(0,0,0,0.12);
+      background: white;
+      border: 1px solid #ddd;
       border-radius: 12px;
       padding: 1.25rem;
     }
 
-    .card-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
+    .card h2 {
+      font-size: 15px;
+      color: #111;
+      margin-bottom: 4px;
+    }
+
+    .card p {
+      font-size: 12px;
+      color: #888;
       margin-bottom: 1rem;
-      padding-bottom: 0.75rem;
-      border-bottom: 0.5px solid rgba(0,0,0,0.08);
     }
-
-    .card-icon {
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      background: #F0F0F0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
-    .card-icon svg {
-      width: 16px;
-      height: 16px;
-      stroke: #555;
-      fill: none;
-      stroke-width: 1.8;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-
-    .card-title { font-size: 15px; font-weight: 500; color: #111; }
-    .card-sub   { font-size: 12px; color: #888; margin-top: 1px; }
 
     .input-row {
       display: flex;
       gap: 8px;
-      align-items: center;
     }
 
     .input-row input {
       flex: 1;
-      background: #F7F7F7;
-      border: 0.5px solid rgba(0,0,0,0.18);
-      border-radius: 8px;
       padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
       font-family: inherit;
       font-size: 13px;
-      color: #111;
       outline: none;
-      transition: border-color .15s;
     }
 
     .input-row input:focus { border-color: #185FA5; }
     .input-row input::placeholder { color: #aaa; }
 
-    .btn {
+    button {
       padding: 8px 16px;
+      background: #185FA5;
+      color: white;
+      border: none;
       border-radius: 8px;
       font-family: inherit;
       font-size: 13px;
-      font-weight: 500;
       cursor: pointer;
-      border: 0.5px solid rgba(0,0,0,0.18);
-      background: transparent;
-      color: #111;
-      transition: background .15s;
-      white-space: nowrap;
     }
 
-    .btn:hover   { background: #F0F0F0; }
-    .btn:active  { transform: scale(0.98); }
-    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-    .btn-primary {
-      background: #185FA5;
-      color: #fff;
-      border-color: #185FA5;
-    }
-
-    .btn-primary:hover { background: #0C447C; border-color: #0C447C; }
+    button:hover    { background: #0C447C; }
+    button:disabled { background: #aaa; cursor: not-allowed; }
 
     .url-list {
       display: flex;
@@ -141,13 +89,12 @@
       padding: 8px 12px;
       background: #F7F7F7;
       border-radius: 8px;
-      border: 0.5px solid rgba(0,0,0,0.08);
     }
 
     .url-text {
       flex: 1;
       font-size: 13px;
-      font-family: 'SF Mono', 'Consolas', monospace;
+      font-family: monospace;
       color: #333;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -157,58 +104,49 @@
     .url-rm {
       background: none;
       border: none;
-      cursor: pointer;
-      padding: 2px 6px;
-      border-radius: 4px;
       color: #999;
       font-size: 18px;
-      line-height: 1;
-      transition: color .15s;
+      cursor: pointer;
+      padding: 0 4px;
     }
 
     .url-rm:hover { color: #c0392b; }
 
-    .empty { font-size: 13px; color: #aaa; padding: 0.5rem 0; }
+    .empty { font-size: 13px; color: #aaa; margin-top: 0.5rem; }
 
     .status-row {
       display: flex;
       align-items: center;
-      gap: 10px;
-      margin-top: 0.75rem;
+      gap: 8px;
+      margin: 0.75rem 0;
     }
 
-    .status-dot {
+    .dot {
       width: 8px;
       height: 8px;
       border-radius: 50%;
       background: #ccc;
-      flex-shrink: 0;
     }
 
-    .status-dot.running { background: #185FA5; animation: pulse 1s infinite; }
-    .status-dot.success { background: #3B6D11; }
-    .status-dot.failed  { background: #A32D2D; }
+    .dot.running { background: #185FA5; animation: pulse 1s infinite; }
+    .dot.success { background: #3B6D11; }
+    .dot.failed  { background: #A32D2D; }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50%       { opacity: 0.4; }
-    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
 
-    .status-label { font-size: 13px; color: #666; }
+    .status-row span { font-size: 13px; color: #666; }
 
     .log-box {
-      margin-top: 0.75rem;
       background: #F7F7F7;
-      border: 0.5px solid rgba(0,0,0,0.08);
+      border: 1px solid #ddd;
       border-radius: 8px;
       padding: 10px 12px;
-      font-family: 'SF Mono', 'Consolas', monospace;
+      font-family: monospace;
       font-size: 12px;
       color: #555;
       height: 180px;
       overflow-y: auto;
       white-space: pre-wrap;
-      line-height: 1.6;
     }
   </style>
 </head>
@@ -216,42 +154,28 @@
 
 <div class="page">
 
-  <div class="page-header">
+  <div>
     <h1>ChatBot Admin</h1>
     <p>Manage knowledge sources and rebuild the vector index.</p>
   </div>
 
   <div class="card">
-    <div class="card-header">
-      <div class="card-icon">
-        <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-      </div>
-      <div>
-        <div class="card-title">Sources</div>
-        <div class="card-sub">URLs used to build the knowledge base</div>
-      </div>
-    </div>
+    <h2>Sources</h2>
+    <p>URLs used to build the knowledge base</p>
     <div class="input-row">
       <input type="text" id="urlInput" placeholder="https://example.com/page" onkeydown="if(event.key==='Enter') addURL()"/>
-      <button class="btn btn-primary" onclick="addURL()">Add</button>
+      <button onclick="addURL()">Add</button>
     </div>
     <div class="url-list" id="urlList"></div>
   </div>
 
   <div class="card">
-    <div class="card-header">
-      <div class="card-icon">
-        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-      </div>
-      <div>
-        <div class="card-title">Vectorize</div>
-        <div class="card-sub">Scrape sources and rebuild the vector index</div>
-      </div>
-    </div>
-    <button class="btn btn-primary" id="runBtn" onclick="runVectorize()">Run vectorize</button>
+    <h2>Vectorize</h2>
+    <p>Scrape sources and rebuild the vector index</p>
+    <button id="runBtn" onclick="runVectorize()">Run vectorize</button>
     <div class="status-row">
-      <div class="status-dot" id="statusDot"></div>
-      <span class="status-label" id="statusLabel">Idle</span>
+      <div class="dot" id="dot"></div>
+      <span id="statusLabel">Idle</span>
     </div>
     <div class="log-box" id="log"></div>
   </div>
@@ -274,7 +198,7 @@
       list.innerHTML = urls.map(u => `
         <div class="url-row">
           <span class="url-text" title="${u}">${u}</span>
-          <button class="url-rm" onclick="removeURL('${u}')" title="Remove">×</button>
+          <button class="url-rm" onclick="removeURL('${u}')">×</button>
         </div>`).join("");
     } catch {}
   }
@@ -314,15 +238,6 @@
     document.getElementById("log").textContent = "";
     setStatus("running", "Running…");
     document.getElementById("runBtn").disabled = true;
-    checkStatus();
-  }
-
-  function setStatus(state, label) {
-    document.getElementById("statusDot").className = "status-dot " + state;
-    document.getElementById("statusLabel").textContent = label;
-  }
-
-  function checkStatus() {
     poll = setInterval(async () => {
       try {
         const res = await fetch(API + "/vectorize/status");
@@ -330,17 +245,20 @@
         const box = document.getElementById("log");
         box.textContent = data.log.join("\n");
         box.scrollTop = box.scrollHeight;
-        if (data.running) {
-          setStatus("running", "Running…");
-        } else {
+        if (!data.running) {
           document.getElementById("runBtn").disabled = false;
           clearInterval(poll);
-          if (data.success === true)       setStatus("success", "Completed successfully");
-          else if (data.success === false)  setStatus("failed",  "Failed — check log");
-          else                              setStatus("", "Idle");
+          if (data.success === true)      setStatus("success", "Completed successfully");
+          else if (data.success === false) setStatus("failed", "Failed — check log");
+          else                             setStatus("", "Idle");
         }
       } catch { clearInterval(poll); }
     }, 1000);
+  }
+
+  function setStatus(state, label) {
+    document.getElementById("dot").className = "dot " + state;
+    document.getElementById("statusLabel").textContent = label;
   }
 
   loadURLs();

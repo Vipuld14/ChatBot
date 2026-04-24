@@ -4,301 +4,258 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>GSU ChatBot</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600&family=Source+Code+Pro:wght@400;500&display=swap');
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-body {
-  font-family: 'Lora', serif;
-  background: #D6E4F0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-height: 100vh;
-  padding: 25px;
-  color: #0D2E4A;
-}
-header {
-  width: 100%;
-  max-width: 800px;
-  padding: 2rem 1rem 1.5rem;
-  text-align: center;
-}
-.logo-badge {
-  display: inline-block;
-  background: #C2D9EE;
-  color: #1A5C8A;
-  font-size: 10px;
-  font-weight: 500;
-  padding: 5px 12px;
-  border-radius: 20px;
-  border: 1px solid #90B8D8;
-  margin-bottom: 1rem;
-  letter-spacing: 0.07em;
-  font-family: 'Source Code Pro', monospace;
-}
-h1 {
-  font-size: 30px;
-  font-weight: 600;
-  color: #0D2E4A;
-  margin-bottom: 5px;
-}
-.subtitle {
-  font-size: 15px;
-  color: #4A6E8A;
-}
-.chat-wrapper {
-  width: 100%;
-  max-width: 800px;
-  display: flex;
-  flex-direction: column;
-  padding: 0 0 1.5rem;
-}
-#chat-log {
-  flex: 1;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  padding: 20px;
-  background: #F4F9FD;
-  border: 1px solid #B0CDE3;
-  border-radius: 12px 12px 0 0;
-  min-height: 380px;
-  max-height: 480px;
-  scroll-behavior: smooth;
-}
-#chat-log::-webkit-scrollbar { width: 5px; }
-#chat-log::-webkit-scrollbar-track { background: transparent; }
-#chat-log::-webkit-scrollbar-thumb { background: #B0CDE3; border-radius: 5px; }
-.message {
-  display: flex;
-  gap: 10px;
-  align-items: flex-start;
-}
-.avatar {
-  flex-shrink: 0;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 10px;
-  font-weight: 500;
-  font-family: 'Source Code Pro', monospace;
-}
-.user-avatar {
-  background: #1A5C8A;
-  color: white;
-}
-.bot-avatar {
-  background: #C2D9EE;
-  color: #1A5C8A;
-  border: 1px solid #90B8D8;
-}
-.bubble {
-  padding: 10px 15px;
-  border-radius: 10px;
-  font-size: 15px;
-  line-height: 1.7;
-  max-width: 90%;
-  font-family: 'Lora', serif;
-  white-space: pre-wrap;
-}
-.user-bubble {
-  background: #1A5C8A;
-  color: white;
-  border-top-left-radius: 5px;
-}
-.bot-bubble {
-  background: #E4F0F9;
-  border: 1px solid #B0CDE3;
-  color: #0D2E4A;
-  border-top-left-radius: 5px;
-}
-.typing-dots span {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  background: #1A5C8A;
-  border-radius: 50%;
-  margin: 0 2px;
-  animation: blink 1.0s infinite;
-}
-.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
-.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
-@keyframes blink {
-  0%, 80%, 100% { opacity: 0.3; }
-  40%           { opacity: 1; }
-}
-.input-bar {
-  display: flex;
-  background: #0D2E4A;
-  border: 1px solid #0D2E4A;
-  border-top: none;
-  border-radius: 0 0 12px 12px;
-  overflow: hidden;
-}
-#question-input {
-  flex: 1;
-  background: #0D2E4A;
-  border: none;
-  outline: none;
-  padding: 10px 20px;
-  font-family: 'Lora', serif;
-  font-size: 15px;
-  color: white;
-}
-#question-input::placeholder { color: #7A9DB8; }
-#send-btn {
-  background: #1A5C8A;
-  color: white;
-  border: none;
-  border-left: 1px solid #2A7AB8;
-  padding: 0 20px;
-  font-family: 'Source Code Pro', monospace;
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.1rem;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-#send-btn:hover   { background: #0D2E4A; }
-#send-btn:active  { transform: scale(1.0); }
-#send-btn:disabled {
-  background: #4A6E8A;
-  color: #B0CDE3;
-  cursor: not-allowed;
-}
-.suggestions {
-  margin-top: 10px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-.suggestion-chip {
-  background: #F4F9FD;
-  border: 1px solid #B0CDE3;
-  color: #4A6E8A;
-  font-family: 'Lora', serif;
-  font-size: 12px;
-  padding: 6px 15px;
-  border-radius: 20px;
-  cursor: pointer;
-  transition: color 0.15s, border-color 0.15s, background 0.15s;
-}
-.suggestion-chip:hover {
-  color: #0D2E4A;
-  border-color: #B0CDE3;
-  background: #E4F0F9;
-}
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #EEF4F9;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  header h1 {
+    font-size: 28px;
+    font-weight: 600;
+    color: #0B2540;
+  }
+
+  header p {
+    font-size: 14px;
+    color: #6B8BAD;
+    margin-top: 4px;
+  }
+
+  .chat-box {
+    width: 100%;
+    max-width: 680px;
+    background: white;
+    border-radius: 16px;
+    border: 1px solid #D4E5F5;
+    overflow: hidden;
+  }
+
+  #chat-log {
+    height: 420px;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .msg {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+  }
+
+  .msg.user {
+    flex-direction: row-reverse;
+  }
+
+  .av {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 9px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .msg.bot .av  { background: #D8E9F8; color: #1659A8; }
+  .msg.user .av { background: #0B2540; color: white; }
+
+  .bubble {
+    max-width: 75%;
+    padding: 10px 14px;
+    border-radius: 14px;
+    font-size: 14px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+  }
+
+  .msg.bot .bubble  { background: #F4F8FD; border: 1px solid #D4E5F5; color: #0B2540; border-bottom-left-radius: 4px; }
+  .msg.user .bubble { background: #1659A8; color: white; border-bottom-right-radius: 4px; }
+
+  .dots { display: flex; gap: 4px; padding: 3px 0; }
+  .dots span {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #1659A8;
+    animation: blink 1s infinite;
+  }
+  .dots span:nth-child(2) { animation-delay: .2s; }
+  .dots span:nth-child(3) { animation-delay: .4s; }
+  @keyframes blink { 0%,80%,100%{opacity:.2} 40%{opacity:1} }
+
+  .input-row {
+    display: flex;
+    gap: 8px;
+    padding: 12px 16px;
+    border-top: 1px solid #D4E5F5;
+    background: #FAFCFF;
+  }
+
+  .input-row input {
+    flex: 1;
+    padding: 9px 14px;
+    border: 1px solid #D4E5F5;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 14px;
+    color: #0B2540;
+    outline: none;
+  }
+
+  .input-row input:focus { border-color: #1659A8; }
+  .input-row input::placeholder { color: #AAC0D8; }
+
+  .input-row button {
+    padding: 9px 18px;
+    background: #1659A8;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .input-row button:hover    { background: #0B2540; }
+  .input-row button:disabled { background: #AAC0D8; cursor: not-allowed; }
+
+  .chips {
+    width: 100%;
+    max-width: 680px;
+    margin-top: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .chips button {
+    padding: 7px 14px;
+    background: white;
+    border: 1px solid #D4E5F5;
+    border-radius: 100px;
+    font-family: inherit;
+    font-size: 12px;
+    color: #6B8BAD;
+    cursor: pointer;
+  }
+
+  .chips button:hover { background: #D8E9F8; color: #1659A8; }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="logo-badge">GEORGIA STATE UNIVERSITY</div>
   <h1>GSU ChatBot</h1>
-  <p class="subtitle">Ask me anything about GSU programs, admissions, and courses.</p>
+  <p>Ask me anything about GSU programs, admissions, and courses.</p>
 </header>
 
-<div class="chat-wrapper">
-  <div id="chat-log">
-    <!-- messages appear here -->
-  </div>
-  <div class="input-bar">
+<div class="chat-box">
+  <div id="chat-log"></div>
+  <div class="input-row">
     <input type="text" id="question-input" placeholder="Ask a question…" onkeydown="if(event.key==='Enter') send()"/>
     <button id="send-btn" onclick="send()">Send</button>
   </div>
 </div>
 
-<div class="suggestions">
-  <button class="suggestion-chip" onclick="suggest(this)">What CS programs does GSU offer?</button>
-  <button class="suggestion-chip" onclick="suggest(this)">How do I apply to the MS program?</button>
-  <button class="suggestion-chip" onclick="suggest(this)">What are the CS degree requirements?</button>
-  <button class="suggestion-chip" onclick="suggest(this)">What is CSC 1301?</button>
+<div class="chips">
+  <button onclick="suggest(this)">What CS programs does GSU offer?</button>
+  <button onclick="suggest(this)">How do I apply to the MS program?</button>
+  <button onclick="suggest(this)">What are the CS degree requirements?</button>
+  <button onclick="suggest(this)">What is CSC 1301?</button>
 </div>
 
 <script>
-const API = "https://whisking-sensation-tartness.ngrok-free.dev/api";
+  const API = "https://whisking-sensation-tartness.ngrok-free.dev/api";
 
-function addMessage(role, content) {
-  const log = document.getElementById("chat-log");
-  const div = document.createElement("div");
-  div.className = "message";
+  function addMessage(role, content) {
+    const log = document.getElementById("chat-log");
+    const row = document.createElement("div");
+    row.className = "msg " + (role === "user" ? "user" : "bot");
 
-  if (role === "user") {
-    div.innerHTML = `
-      <div class="avatar user-avatar">YOU</div>
-      <div class="bubble user-bubble">${escapeHTML(content)}</div>
-    `;
-  } else if (role === "typing") {
-    div.id = "typing-msg";
-    div.innerHTML = `
-      <div class="avatar bot-avatar">AI</div>
-      <div class="bubble bot-bubble typing-dots">
-        <span></span><span></span><span></span>
-      </div>
-    `;
-  } else {
-    div.innerHTML = `
-      <div class="avatar bot-avatar">AI</div>
-      <div class="bubble bot-bubble">${escapeHTML(content)}</div>
-    `;
+    if (role === "typing") {
+      row.id = "typing-msg";
+      row.innerHTML = `<div class="av">AI</div><div class="bubble"><div class="dots"><span></span><span></span><span></span></div></div>`;
+    } else {
+      const label = role === "user" ? "YOU" : "AI";
+      row.innerHTML = `<div class="av">${label}</div><div class="bubble">${esc(content)}</div>`;
+    }
+
+    log.appendChild(row);
+    log.scrollTop = log.scrollHeight;
   }
 
-  log.appendChild(div);
-  log.scrollTop = log.scrollHeight;
-  return div;
-}
-
-function removeTyping() {
-  const el = document.getElementById("typing-msg");
-  if (el) el.remove();
-}
-
-async function send() {
-  const input = document.getElementById("question-input");
-  const btn = document.getElementById("send-btn");
-  const query = input.value.trim();
-  if (!query || btn.disabled) return;
-
-  input.value = "";
-  btn.disabled = true;
-  addMessage("user", query);
-  addMessage("typing");
-
-  try {
-    const res = await fetch(`${API}/chat`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query })
-    });
-    const data = await res.json();
-    removeTyping();
-    addMessage("bot", data.answer || data.error || "No response.");
-  } catch {
-    removeTyping();
-    addMessage("bot", "Could not reach the server. Make sure the backend is running.");
+  function removeTyping() {
+    const el = document.getElementById("typing-msg");
+    if (el) el.remove();
   }
 
-  btn.disabled = false;
-  input.focus();
-}
+  async function send() {
+    const input = document.getElementById("question-input");
+    const btn   = document.getElementById("send-btn");
+    const query = input.value.trim();
+    if (!query || btn.disabled) return;
 
-function suggest(btn) {
-  document.getElementById("question-input").value = btn.textContent;
-  send();
-}
+    input.value = "";
+    btn.disabled = true;
+    addMessage("user", query);
+    addMessage("typing");
 
-function escapeHTML(str) {
-  return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br>");
-}
+    try {
+      const res  = await fetch(`${API}/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query })
+      });
+      const data = await res.json();
+      removeTyping();
+
+      let text = data.answer || data.error || "No response.";
+      if (data.sources && data.sources.length > 0) {
+        text += "\n\nSources:";
+        data.sources.forEach(url => { text += "\n• " + url; });
+      }
+
+      addMessage("bot", text);
+    } catch {
+      removeTyping();
+      addMessage("bot", "Could not reach the server. Make sure the backend is running.");
+    }
+
+    btn.disabled = false;
+    input.focus();
+  }
+
+  function suggest(btn) {
+    document.getElementById("question-input").value = btn.textContent;
+    send();
+  }
+
+  function esc(str) {
+    return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br>");
+  }
+
+  addMessage("bot", "Hi! Ask me anything about GSU programs, admissions, or courses.");
 </script>
+
 </body>
 </html>

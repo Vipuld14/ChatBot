@@ -75,7 +75,7 @@ Documents:
 Query:
 {question}
 
-Answer (max 3 sentences). End your responses with a Source attribution in the format [Source: URL] where URL is the source of the information from the documents provided.
+Answer (max 3 sentences). End your responses with a new line with a Source attribution in the format [Source: URL] where URL is the source of the information from the documents provided. Make sure the source URl doesnt exit the text box.
 
 """,
     input_variables=["question", "documents"],
